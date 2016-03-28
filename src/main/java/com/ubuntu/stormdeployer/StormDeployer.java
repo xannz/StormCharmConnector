@@ -54,7 +54,6 @@ public class StormDeployer {
 
     public void git(String giturl, File directory, PrintStream out) throws Exception {
         execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
-
     }
 
     public void deploy(String command, Topology topology, PrintStream out) throws Exception {
@@ -124,6 +123,7 @@ public class StormDeployer {
             }
 
             // Deploy the topology
+            out.append(topologyDir.getAbsolutePath() + "/target/" + jar + "\n");
             deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
         }
     }

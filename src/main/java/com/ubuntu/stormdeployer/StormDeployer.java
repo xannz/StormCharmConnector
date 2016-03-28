@@ -70,18 +70,23 @@ public class StormDeployer {
         // choise target folder
         File target = new File("/tmp/stormdeployertmp");
         if (!target.exists()) {
+            
+            out.append("Creating /tmp/stormdeployertmp \n");
+            
             target.mkdir();
         }
 
         File topologyDir = new File(target.getAbsolutePath() + "/" + name);
         // Did we deploy this topology already?
         if (!topologyDir.exists()) {
+            out.append("Topology not yet deployed.\n");
             topologyDir.mkdir();
             // download from git
             git(repo, topologyDir, out);
 
             // Run before packaging script
             if (beforePackage != null) {
+                out.append("Run before packaging script.\n");
                 File beforePackageDir = new File(topologyDir.getAbsolutePath() + "/package");
                 beforePackageDir.mkdir();
                 File packageScript = new File(beforePackageDir.getAbsolutePath() + "/script");
@@ -91,6 +96,7 @@ public class StormDeployer {
             }
 
             if (dss != null) {
+                out.append("Applying datasources.\n");
                 for (DataSource ds : dss) {
                     applyDataSource(ds, topologyDir, out);
                 }
@@ -102,6 +108,7 @@ public class StormDeployer {
 
             // Run before deploying script
             if (beforeDeploy != null) {
+                out.append("Running before deploy script.\n");
                 File beforeDeployDir = new File(topologyDir.getAbsolutePath() + "/deploy");
                 beforeDeployDir.mkdir();
                 File deployScript = new File(beforeDeployDir.getAbsolutePath() + "/script");
@@ -139,7 +146,7 @@ public class StormDeployer {
     }
 
     public void deploy(String deployment, String jar, String topologyClass, String topologyName, PrintStream out) throws Exception {
-        out.append("Deploying:" + deployment + " " + jar + " " + topologyClass + " " + topologyName + "\n");
+        out.append("Deploying(2):" + deployment + " " + jar + " " + topologyClass + " " + topologyName + "\n");
         execute(deployment + " " + jar + " " + topologyClass + " " + topologyName, out);
     }
 

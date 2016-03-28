@@ -196,7 +196,7 @@ public class StormDeployer {
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());
-            //sd.deploy("/opt/storm/latest/bin/storm jar", topology, out);
+            sd.deploy("/opt/storm/latest/bin/storm jar", topology, out);
         }
     }
 

@@ -146,7 +146,7 @@ public class StormDeployer {
     }
 
     public void deploy(String deployment, String jar, String topologyClass, String topologyName, PrintStream out) throws Exception {
-        out.append("Deploying(2):" + deployment + " " + jar + " " + topologyClass + " " + topologyName + "\n");
+        out.append("Deploying:" + deployment + " " + jar + " " + topologyClass + " " + topologyName + "\n");
         execute(deployment + " " + jar + " " + topologyClass + " " + topologyName, out);
     }
 

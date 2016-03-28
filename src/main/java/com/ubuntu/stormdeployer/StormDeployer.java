@@ -66,6 +66,12 @@ public class StormDeployer {
         String beforePackage = topology.getScriptbeforepackaging();
         String beforeDeploy = topology.getScriptbeforedeploying();
         List<DataSource> dss = topology.getDatasources();
+        
+        out.append("name: " + name + "\n");
+        out.append("jar: " + jar + "\n");
+        out.append("packaging: " + packaging + "\n");
+        out.append("repo: " + repo + "\n");
+        out.append("topologyclass: " + topologyclass + "\n");
 
         // choise target folder
         File target = new File("/tmp/stormdeployertmp");
@@ -146,6 +152,7 @@ public class StormDeployer {
     }
 
     public void deploy(String deployment, String jar, String topologyClass, String topologyName, PrintStream out) throws Exception {
+        out.append("--- DEPLOYING ---\n");
         out.append("Deploying:" + deployment + " " + jar + " " + topologyClass + " " + topologyName + "\n");
         execute(deployment + " " + jar + " " + topologyClass + " " + topologyName, out);
     }

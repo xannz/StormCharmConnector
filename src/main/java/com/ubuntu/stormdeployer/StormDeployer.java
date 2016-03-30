@@ -3,7 +3,6 @@
  */
 package com.ubuntu.stormdeployer;
 
-import static com.sun.org.apache.xerces.internal.xinclude.XIncludeHandler.BUFFER_SIZE;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -238,17 +237,17 @@ public class StormDeployer {
      * @throws Exception When deployment can not be done.
      */
     public static void main(String[] args) throws Exception {
-        //if (args.length < 1) {
-        //    throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
-        //}
+        if (args.length < 1) {
+            throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
+        }
         PrintStream out = System.out;
         if (args.length > 1) {
             out = new PrintStream(args[1]);
         }
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
-        //sd.wget(new URL(args[0]), stormFile);
-        sd.wget(new URL("https://raw.githubusercontent.com/xannz/WordCountExample/master/WordCountExample.storm"), stormFile);
+        sd.wget(new URL(args[0]), stormFile);
+        //sd.wget(new URL("https://raw.githubusercontent.com/xannz/WordCountExample/master/WordCountExample.storm"), stormFile);
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());

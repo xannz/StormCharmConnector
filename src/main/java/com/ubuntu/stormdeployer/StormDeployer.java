@@ -3,12 +3,17 @@
  */
 package com.ubuntu.stormdeployer;
 
+import static com.sun.org.apache.xerces.internal.xinclude.XIncludeHandler.BUFFER_SIZE;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -65,19 +70,21 @@ public class StormDeployer {
         String beforePackage = topology.getScriptbeforepackaging();
         String beforeDeploy = topology.getScriptbeforedeploying();
         List<DataSource> dss = topology.getDatasources();
-        
+        String release = topology.getRelease();
+
         out.append("name: " + name + "\n");
         out.append("jar: " + jar + "\n");
         out.append("packaging: " + packaging + "\n");
         out.append("repo: " + repo + "\n");
         out.append("topologyclass: " + topologyclass + "\n");
+        out.append("release: " + release + "\n");
 
         // choise target folder
         File target = new File("/tmp/stormdeployertmp");
         if (!target.exists()) {
-            
+
             out.append("Creating /tmp/stormdeployertmp \n");
-            
+
             target.mkdir();
         }
 
@@ -86,45 +93,81 @@ public class StormDeployer {
         if (!topologyDir.exists()) {
             out.append("Topology not yet deployed.\n");
             topologyDir.mkdir();
-            // download from git
-            git(repo, topologyDir, out);
 
-            // Run before packaging script
-            if (beforePackage != null) {
-                out.append("Run before packaging script.\n");
-                File beforePackageDir = new File(topologyDir.getAbsolutePath() + "/package");
-                beforePackageDir.mkdir();
-                File packageScript = new File(beforePackageDir.getAbsolutePath() + "/script");
-                wget(new URL(beforePackage), packageScript);
-                execute("chmod u+x " + packageScript.getAbsolutePath(), out);
-                execute(packageScript.getAbsolutePath(), out);
-            }
+            //Check if source code or jar file
+            if (packaging.equals("jar")) {
+                out.append("Jar will be downloaded.\n");
 
-            if (dss != null) {
-                out.append("Applying datasources.\n");
-                for (DataSource ds : dss) {
-                    applyDataSource(ds, topologyDir, out);
+                URL url = new URL(release);
+
+                try (InputStream inStream = url.openStream()) {
+                    System.out.println(inStream.available());
+                    BufferedInputStream bufIn = new BufferedInputStream(inStream);
+
+                    File fileWrite = new File(topologyDir.getAbsolutePath() + "/" + jar);
+                    OutputStream outp = new FileOutputStream(fileWrite);
+                    BufferedOutputStream bufOut = new BufferedOutputStream(outp);
+                    byte buffer[] = new byte[1024];
+                    while (true) {
+                        int nRead = bufIn.read(buffer, 0, buffer.length);
+                        if (nRead <= 0) {
+                            break;
+                        }
+                        bufOut.write(buffer, 0, nRead);
+                    }
+
+                    bufOut.flush();
+                    outp.close();
                 }
+                
+                deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
+
+            } else {
+
+                out.append("Source code will be downloaded.\n");
+
+                // download source code from git    
+                git(repo, topologyDir, out);
+
+                // Run before packaging script
+                if (beforePackage != null) {
+                    out.append("Run before packaging script.\n");
+                    File beforePackageDir = new File(topologyDir.getAbsolutePath() + "/package");
+                    beforePackageDir.mkdir();
+                    File packageScript = new File(beforePackageDir.getAbsolutePath() + "/script");
+                    wget(new URL(beforePackage), packageScript);
+                    execute("chmod u+x " + packageScript.getAbsolutePath(), out);
+                    execute(packageScript.getAbsolutePath(), out);
+                }
+
+                if (dss != null) {
+                    out.append("Applying datasources.\n");
+                    for (DataSource ds : dss) {
+                        applyDataSource(ds, topologyDir, out);
+                    }
+                }
+
+                // Todo implement alternative packaging and subdirectory support for Maven
+                MavenCli cli = new MavenCli();
+                cli.doMain(new String[]{"package"}, topologyDir.getAbsolutePath(), out, out);
+
+                // Run before deploying script
+                if (beforeDeploy != null) {
+                    out.append("Running before deploy script.\n");
+                    File beforeDeployDir = new File(topologyDir.getAbsolutePath() + "/deploy");
+                    beforeDeployDir.mkdir();
+                    File deployScript = new File(beforeDeployDir.getAbsolutePath() + "/script");
+                    wget(new URL(beforeDeploy), deployScript);
+                    execute("chmod u+x " + deployScript.getAbsolutePath(), out);
+                    execute(deployScript.getAbsolutePath(), out);
+                }
+
+                // Deploy the topology
+                //out.append(topologyDir.getAbsolutePath() + "/target/" + jar + "\n");
+                deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
             }
 
-            // Todo implement alternative packaging and subdirectory support for Maven
-            MavenCli cli = new MavenCli();
-            cli.doMain(new String[]{"package"}, topologyDir.getAbsolutePath(), out, out);
-
-            // Run before deploying script
-            if (beforeDeploy != null) {
-                out.append("Running before deploy script.\n");
-                File beforeDeployDir = new File(topologyDir.getAbsolutePath() + "/deploy");
-                beforeDeployDir.mkdir();
-                File deployScript = new File(beforeDeployDir.getAbsolutePath() + "/script");
-                wget(new URL(beforeDeploy), deployScript);
-                execute("chmod u+x " + deployScript.getAbsolutePath(), out);
-                execute(deployScript.getAbsolutePath(), out);
-            }
-
-            // Deploy the topology
-            out.append(topologyDir.getAbsolutePath() + "/target/" + jar + "\n");
-            deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
+            
         }
     }
 
@@ -151,7 +194,7 @@ public class StormDeployer {
         execute(file + " " + sb.toString(), out);
     }
 
-    public void deploy(String deployment, String jar, String topologyClass, String topologyName, PrintStream out) throws Exception {        
+    public void deploy(String deployment, String jar, String topologyClass, String topologyName, PrintStream out) throws Exception {
         out.append("Deploying:" + deployment + " " + jar + " " + topologyClass + " " + topologyName + "\n");
         execute(deployment + " " + jar + " " + topologyClass + " " + topologyName, out);
     }
@@ -195,17 +238,17 @@ public class StormDeployer {
      * @throws Exception When deployment can not be done.
      */
     public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
-        }
+        //if (args.length < 1) {
+        //    throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
+        //}
         PrintStream out = System.out;
         if (args.length > 1) {
             out = new PrintStream(args[1]);
         }
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
-        sd.wget(new URL(args[0]), stormFile);
-        //sd.wget(new URL("https://raw.githubusercontent.com/xannz/storm-projects/master/WordCount/WordCount.storm"), stormFile);
+        //sd.wget(new URL(args[0]), stormFile);
+        sd.wget(new URL("https://raw.githubusercontent.com/xannz/WordCountExample/master/WordCountExample.storm"), stormFile);
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());

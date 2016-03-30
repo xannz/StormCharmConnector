@@ -22,6 +22,8 @@ public class Topology {
 	private String scriptbeforepackaging;
 	private String scriptbeforedeploying;
 	private List<DataSource> datasources;
+        
+        private String release;
 	
 	public String getName() {
 		return name;
@@ -71,4 +73,12 @@ public class Topology {
 	public void setRepository(String repository) {
 		this.repository = repository;
 	}
+        
+        
+        public String getRelease() {
+            return release;
+        }
+        public void setRelease(String release) {
+            this.release = release;
+        }
 }

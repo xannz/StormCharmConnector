@@ -87,7 +87,7 @@ public class StormDeployer {
             target.mkdir();
         }
 
-        File topologyDir = new File(target.getAbsolutePath() + "/" + name);
+        File topologyDir = new File(target.getAbsolutePath() + "/" + name.split(" ")[0]);
         // Did we deploy this topology already?
         if (!topologyDir.exists()) {
             out.append("Topology not yet deployed.\n");
@@ -247,7 +247,7 @@ public class StormDeployer {
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
         sd.wget(new URL(args[0]), stormFile);
-        //sd.wget(new URL("https://raw.githubusercontent.com/xannz/WordCountExample/master/WordCountExample.storm"), stormFile);
+        //sd.wget(new URL("https://github.ugent.be/raw/sborny/storm-projects/master/WordCount.storm?token=AAAD4Hfsao7jaeEP-gnPfviZMiLPdlXzks5XBkeswA%3D%3D"), stormFile);
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());

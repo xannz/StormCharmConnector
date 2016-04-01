@@ -79,6 +79,8 @@ public class StormDeployer {
         String beforeDeploy = topology.getScriptbeforedeploying();
         List<DataSource> dss = topology.getDatasources();
         String release = topology.getRelease();
+        
+        String [] nameAndParams = name.split(" ", 2);
 
         // choise target folder
         File target = new File("/tmp/stormdeployertmp");
@@ -87,7 +89,8 @@ public class StormDeployer {
             target.mkdir();
         }
 
-        File topologyDir = new File(target.getAbsolutePath() + "/" + name.split(" ")[0]);
+        //File topologyDir = new File(target.getAbsolutePath() + "/" + name.split(" ")[0]);
+        File topologyDir = new File(target.getAbsolutePath() + "/" + nameAndParams[0]);
         // Did we deploy this topology already?
         if (!topologyDir.exists()) {
             out.append("Topology not yet deployed.\n");
@@ -119,7 +122,7 @@ public class StormDeployer {
                     outp.close();
                 }
 
-                deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
+                deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, nameAndParams[1], out);
 
             } else {
 
@@ -164,7 +167,7 @@ public class StormDeployer {
                 }
 
                 // Deploy the topology
-                deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
+                deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, nameAndParams[1], out);
             }
 
         }

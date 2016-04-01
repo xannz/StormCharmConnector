@@ -241,8 +241,8 @@ public class StormDeployer {
             throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
         }
         PrintStream out = System.out;
-        if (args.length > 1) {
-            out = new PrintStream(args[1]);
+        if (args.length > 2) {
+            out = new PrintStream(args[2]);
         }
 
         StormDeployer sd = new StormDeployer();

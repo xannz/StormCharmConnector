@@ -126,7 +126,7 @@ public class StormDeployer {
                     outp.close();
                 }
                 
-                //deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
+                deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
 
             } else {
 
@@ -172,7 +172,7 @@ public class StormDeployer {
 
                 // Deploy the topology
                 //out.append(topologyDir.getAbsolutePath() + "/target/" + jar + "\n");
-                //deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
+                deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
             }
 
             
@@ -253,6 +253,7 @@ public class StormDeployer {
         if (args.length > 1) {
             out = new PrintStream(args[1]);
         }
+        
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
         //sd.wget(new URL(args[0]), stormFile);

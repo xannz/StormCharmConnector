@@ -90,7 +90,7 @@ public class StormDeployerTest extends TestCase {
     	File dir = new File("/tmp/gittest");
     	if(dir.exists())
     		dir.delete();
-    	sd.git("https://github.com/mectors/StormCharmConnector.git",dir,ps);
+    	sd.git("https://github.com/mectors/StormCharmConnector.git",dir,ps, "");
     	assertTrue(dir.exists());
     	sd.execute("rm -rf "+dir, ps);
     	ps.close();
@@ -225,7 +225,7 @@ public class StormDeployerTest extends TestCase {
 
 
  
-    	sd.deploy("echo /opt/storm/latest/bin/storm jar",top, ps);
+    	sd.deploy("echo /opt/storm/latest/bin/storm jar",top, ps, "");
     	
     	String output = new String(out.toString());
     	//System.out.println(output);

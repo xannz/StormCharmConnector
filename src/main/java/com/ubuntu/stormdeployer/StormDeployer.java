@@ -56,18 +56,21 @@ public class StormDeployer {
         rbc.close();
     }
 
-    public void git(String giturl, File directory, PrintStream out) throws Exception {
-        //execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
-        
-        String EersteDeel = giturl.split("//")[0];
-        String userenpass = "//sborny:thupa8ii@";
-        String TweedeDeel = giturl.split("//")[1];
-        String git = EersteDeel + userenpass + TweedeDeel;
-        out.append("git clone " + EersteDeel + userenpass + TweedeDeel + " " + directory.getAbsolutePath() +"\n");
-        execute("git clone " + git + " " + directory.getAbsolutePath(), out);
+    public void git(String giturl, File directory, PrintStream out, String credentials) throws Exception {
+
+        if (credentials.equals("")) {
+            execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
+        } else {
+            String EersteDeel = giturl.split("//")[0];
+            String userenpass = "//" + credentials + "@";
+            String TweedeDeel = giturl.split("//")[1];
+            String git = EersteDeel + userenpass + TweedeDeel;
+            out.append("git clone " + EersteDeel + userenpass + TweedeDeel + " " + directory.getAbsolutePath() + "\n");
+            execute("git clone " + git + " " + directory.getAbsolutePath(), out);
+        }
     }
 
-    public void deploy(String command, Topology topology, PrintStream out) throws Exception {
+    public void deploy(String command, Topology topology, PrintStream out, String credentials) throws Exception {
         String name = topology.getName();
         String jar = topology.getJar();
         String packaging = topology.getPackaging();
@@ -125,7 +128,7 @@ public class StormDeployer {
                     bufOut.flush();
                     outp.close();
                 }
-                
+
                 deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
 
             } else {
@@ -133,7 +136,7 @@ public class StormDeployer {
                 out.append("Source code will be downloaded.\n");
 
                 // download source code from git    
-                git(repo, topologyDir, out);
+                git(repo, topologyDir, out, credentials);
 
                 // Run before packaging script
                 if (beforePackage != null) {
@@ -155,7 +158,7 @@ public class StormDeployer {
 
                 // Todo implement alternative packaging and subdirectory support for Maven
                 MavenCli cli = new MavenCli();
-                
+
                 //cli.doMain(new String[]{"package"}, topologyDir.getAbsolutePath(), out, out);
                 cli.doMain(new String[]{packaging}, topologyDir.getAbsolutePath(), out, out);
 
@@ -175,7 +178,6 @@ public class StormDeployer {
                 deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
             }
 
-            
         }
     }
 
@@ -253,7 +255,7 @@ public class StormDeployer {
         if (args.length > 1) {
             out = new PrintStream(args[1]);
         }
-        
+
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
         //sd.wget(new URL(args[0]), stormFile);
@@ -261,7 +263,7 @@ public class StormDeployer {
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());
-            sd.deploy("/opt/storm/latest/bin/storm jar", topology, out);
+            sd.deploy("/opt/storm/latest/bin/storm jar", topology, out, args[1]);
         }
     }
 

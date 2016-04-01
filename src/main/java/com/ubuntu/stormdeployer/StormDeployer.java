@@ -57,7 +57,14 @@ public class StormDeployer {
     }
 
     public void git(String giturl, File directory, PrintStream out) throws Exception {
-        execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
+        //execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
+        
+        String EersteDeel = giturl.split("//")[0];
+        String userenpass = "//sborny:thupa8ii@";
+        String TweedeDeel = giturl.split("//")[1];
+        String git = EersteDeel + userenpass + TweedeDeel;
+        out.append("git clone " + EersteDeel + userenpass + TweedeDeel + " " + directory.getAbsolutePath() +"\n");
+        execute("git clone " + git + " " + directory.getAbsolutePath(), out);
     }
 
     public void deploy(String command, Topology topology, PrintStream out) throws Exception {
@@ -119,7 +126,7 @@ public class StormDeployer {
                     outp.close();
                 }
                 
-                deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
+                //deploy(command, topologyDir.getAbsolutePath() + "/" + jar, topologyclass, name, out);
 
             } else {
 
@@ -165,7 +172,7 @@ public class StormDeployer {
 
                 // Deploy the topology
                 //out.append(topologyDir.getAbsolutePath() + "/target/" + jar + "\n");
-                deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
+                //deploy(command, topologyDir.getAbsolutePath() + "/target/" + jar, topologyclass, name, out);
             }
 
             
@@ -239,17 +246,17 @@ public class StormDeployer {
      * @throws Exception When deployment can not be done.
      */
     public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
-        }
+        //if (args.length < 1) {
+        //    throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
+        //}
         PrintStream out = System.out;
         if (args.length > 1) {
             out = new PrintStream(args[1]);
         }
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
-        sd.wget(new URL(args[0]), stormFile);
-        //sd.wget(new URL("https://github.ugent.be/raw/sborny/storm-projects/master/WordCount.storm?token=AAAD4Hfsao7jaeEP-gnPfviZMiLPdlXzks5XBkeswA%3D%3D"), stormFile);
+        //sd.wget(new URL(args[0]), stormFile);
+        sd.wget(new URL("https://github.ugent.be/raw/sborny/StormDemo/master/StormDemo?token=AAAD4IP4Grwbg-8Em6hNhDyTSKXN5stEks5XB6USwA%3D%3D"), stormFile);
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());

@@ -59,10 +59,8 @@ public class StormDeployer {
     public void git(String giturl, File directory, PrintStream out, String credentials) throws Exception {
 
         if (credentials.equals("")) {
-            out.append("git clone WITHOUT CREDENTIALS\n");
             execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
         } else {
-            out.append("git clonse WITH CREDENTIALS\n");
             String EersteDeel = giturl.split("//")[0];
             String userenpass = "//" + credentials + "@";
             String TweedeDeel = giturl.split("//")[1];
@@ -269,11 +267,9 @@ public class StormDeployer {
         StormDeployer sd = new StormDeployer();
         File stormFile = new File("/tmp/stormdeploy" + System.nanoTime());
         sd.wget(new URL(args[0]), stormFile);
-        //sd.wget(new URL("https://github.ugent.be/raw/sborny/StormDemo/master/StormDemo?token=AAAD4IP4Grwbg-8Em6hNhDyTSKXN5stEks5XB6USwA%3D%3D"), stormFile);
-
+        
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
-            out.append("Deploying topology:" + topology.getName());
-            
+            out.append("Deploying topology:" + topology.getName());            
             sd.deploy("/opt/storm/latest/bin/storm jar", topology, out, credentials);
         }
     }

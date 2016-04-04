@@ -258,6 +258,8 @@ public class StormDeployer {
         PrintStream out = System.out;
         if (args.length > 2) {
             out = new PrintStream(args[2]);
+        }else if (args.length > 1) {
+            out = new PrintStream(args[1]);
         }
 
         StormDeployer sd = new StormDeployer();

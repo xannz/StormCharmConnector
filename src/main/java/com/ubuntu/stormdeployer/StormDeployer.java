@@ -258,8 +258,10 @@ public class StormDeployer {
             throw new Exception("deployer file is missing. Usage: deployerURL (debugLogFile)");
         }
         PrintStream out = System.out;
+        String credentials = "";
         if (args.length > 2) {
             out = new PrintStream(args[2]);
+            credentials = args[1];
         }else if (args.length > 1) {
             out = new PrintStream(args[1]);
         }
@@ -271,7 +273,8 @@ public class StormDeployer {
 
         for (Topology topology : sd.readTopologies(stormFile.getAbsolutePath())) {
             out.append("Deploying topology:" + topology.getName());
-            sd.deploy("/opt/storm/latest/bin/storm jar", topology, out, args[1]);
+            
+            sd.deploy("/opt/storm/latest/bin/storm jar", topology, out, credentials);
         }
     }
 

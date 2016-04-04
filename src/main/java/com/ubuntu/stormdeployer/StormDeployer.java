@@ -59,8 +59,10 @@ public class StormDeployer {
     public void git(String giturl, File directory, PrintStream out, String credentials) throws Exception {
 
         if (credentials.equals("")) {
+            out.append("git clone WITHOUT CREDENTIALS\n");
             execute("git clone " + giturl + " " + directory.getAbsolutePath(), out);
         } else {
+            out.append("git clonse WITH CREDENTIALS\n");
             String EersteDeel = giturl.split("//")[0];
             String userenpass = "//" + credentials + "@";
             String TweedeDeel = giturl.split("//")[1];

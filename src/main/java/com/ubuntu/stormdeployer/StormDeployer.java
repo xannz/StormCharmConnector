@@ -155,8 +155,12 @@ public class StormDeployer {
                 // Todo implement alternative packaging and subdirectory support for Maven
                 MavenCli cli = new MavenCli();
 
-                //cli.doMain(new String[]{"package"}, topologyDir.getAbsolutePath(), out, out);
-                cli.doMain(new String[]{packaging}, topologyDir.getAbsolutePath(), out, out);
+                if(packaging.equals("mvn package")){
+                    cli.doMain(new String[]{"package"}, topologyDir.getAbsolutePath(), out, out);
+                }else{
+                    cli.doMain(new String[]{packaging}, topologyDir.getAbsolutePath(), out, out);
+                }
+                
 
                 // Run before deploying script
                 if (beforeDeploy != null) {
